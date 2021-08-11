@@ -36,8 +36,16 @@ namespace EPUBium_Desktop
                 RequestHandler = new LocalhostRequestHandler(),
                 MenuHandler = new DevToolsMenuHandler()
             };
+            webView.TitleChanged += WebView_TitleChanged;
             webView.LoadUrlAsync("http://epub.zyf-internal.com");
             Controls.Add(webView);
+        }
+
+        private void WebView_TitleChanged(object sender, TitleChangedEventArgs e)
+        {
+            Invoke(new Action(() => {
+                this.Text = e.Title + " - EPUBium Desktop " + Application.ProductVersion;
+            }));
         }
 
         private void Form1_Disposed(object sender, EventArgs e)
@@ -46,13 +54,6 @@ namespace EPUBium_Desktop
             webView.Dispose();
             Cef.PreShutdown();
             Cef.Shutdown();
-            int me = Process.GetCurrentProcess().Id;
-            //Some process will not exit after close.
-            //Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Application.ExecutablePath))
-            //    .Where(f =>Path.GetFullPath(f.MainModule.FileName) == Path.GetFullPath(Application.ExecutablePath))
-            //    .Where(f=>f.Id!=me)
-            //    .ToList().ForEach(p => p.Kill());
-            //Environment.Exit(0);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -61,7 +62,6 @@ namespace EPUBium_Desktop
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-
             Properties.Settings.Default.windowsize = this.Size;
             Properties.Settings.Default.Save();
             base.OnFormClosing(e);

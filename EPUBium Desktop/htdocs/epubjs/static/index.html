@@ -110,35 +110,35 @@
         renderH.display().then(() => { reportMessage("EPUB_BOOK_INIT_SUCCESS");
         reportMessage("SHOW_PROGRESS", "0");
                 reportLocationAsync(); });
-        renderH.on("click",function(event){
-				try {
-					if (event.target.tagName.toLowerCase() == "a" && event.target.href) {
-					    reportMessage("AUTO_SAVE_REQUIRE",renderH.location.start.cfi);
-					    return;
-					}
-					if (event.target.parentNode.tagName.toLowerCase() == "a" && event.target.parentNode.href) return;
-					if (window.getSelection().toString().length !== 0) return;
-					if (renderH.manager.getContents()[0].window.getSelection().toString().length !== 0) return;
-				} catch (err) {}
-				let wrapper = renderH.manager.container;
-				let third = wrapper.clientWidth / 3;
-				let x = event.pageX - wrapper.scrollLeft;
-				let thirdY = wrapper.clientHeight / 3;
-				let y = event.pageY;
+        // renderH.on("click",function(event){
+		// 		try {
+		// 			if (event.target.tagName.toLowerCase() == "a" && event.target.href) {
+		// 			    reportMessage("AUTO_SAVE_REQUIRE",renderH.location.start.cfi);
+		// 			    return;
+		// 			}
+		// 			if (event.target.parentNode.tagName.toLowerCase() == "a" && event.target.parentNode.href) return;
+		// 			if (window.getSelection().toString().length !== 0) return;
+		// 			if (renderH.manager.getContents()[0].window.getSelection().toString().length !== 0) return;
+		// 		} catch (err) {}
+		// 		let wrapper = renderH.manager.container;
+		// 		let third = wrapper.clientWidth / 3;
+		// 		let x = event.pageX - wrapper.scrollLeft;
+		// 		let thirdY = wrapper.clientHeight / 3;
+		// 		let y = event.pageY;
 
-				var clickingPos = Math.floor(x / third) + (Math.floor(y/thirdY) * 3);
-				//console.log("clickingpos = "+clickingPos);
-				if (clickingPos==4) {
-					event.preventDefault();
-				} else if (clickingPos<4) {
-					event.preventDefault();
-					prev();
-				} else if (clickingPos>4) {
-					event.preventDefault();
-					next();
-				}
+		// 		var clickingPos = Math.floor(x / third) + (Math.floor(y/thirdY) * 3);
+		// 		//console.log("clickingpos = "+clickingPos);
+		// 		if (clickingPos==4) {
+		// 			event.preventDefault();
+		// 		} else if (clickingPos<4) {
+		// 			event.preventDefault();
+		// 			prev();
+		// 		} else if (clickingPos>4) {
+		// 			event.preventDefault();
+		// 			next();
+		// 		}
 
-			});
+		// 	});
 
         window.addEventListener("onkeypress",function(e){
             console.log(e);

@@ -87,6 +87,7 @@ namespace EPUBium_Desktop
         ZipFile src;
         public MyPakFile(string path)
         {
+            ICSharpCode.SharpZipLib.Zip.ZipStrings.UseUnicode = true;
             src = new ZipFile(path);
             System.Collections.IEnumerator en = src.GetEnumerator();
             while (en.MoveNext())
@@ -95,6 +96,7 @@ namespace EPUBium_Desktop
                 if(ze != null)
                 {
                     files.Add(ze.Name);
+                    Console.WriteLine(ze.Name);
                 }
             }
         }
@@ -213,9 +215,12 @@ namespace EPUBium_Desktop
                 String uuid = apipath.Substring(5,apipath.Length-5);
                 bookEntries = Program.DBUtils.queryBooks("uuid = ?", uuid);
                 BookEntry b = bookEntries[0];
-                ensureBookExtracted(b);
-                Program.DBUtils.execSql("update library set lastopen=? where uuid=?", JavaSystem.currentTimeMillis(), b.getUUID());
-                return newFixedLengthResponse("<script>window.location.replace('/read/" + b.getUUID() + "/read.html');</script>");
+                if (File.Exists(b.getPath()))
+                {
+                    ensureBookExtracted(b);
+                    Program.DBUtils.execSql("update library set lastopen=? where uuid=?", JavaSystem.currentTimeMillis(), b.getUUID());
+                    return newFixedLengthResponse("<script>window.location.replace('/read/" + b.getUUID() + "/read.html');</script>");
+                }
             }
             return new ApiResponse(ApiResponseType.ErrorNotFound, "404 Not Found");
         }
@@ -374,6 +379,7 @@ namespace EPUBium_Desktop
                     Tag = bookuuid
                 };
             }
+            api = HttpUtility.UrlDecode(api);
             Stream stream = openingBook.OpenRead(api);
             if (stream != null)
             {

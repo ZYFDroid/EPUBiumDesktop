@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPUBium - 图书馆</title>
+    <title>全部书籍</title>
     <script src="/common/lib/jquery-3.6.0.js"></script>
     <script src="/common/lib/vue.js"></script>
     <script src="/common/lib/vue-lazyload.js"></script>
@@ -122,6 +122,7 @@
             $.ajax({url:"/api/folder/"+folder.UUID,success:function (result) {
                     libraryController.books = JSON.parse(result);
                     $("#title").text(folder.displayName);
+                    document.title=folder.displayName;
             }});
             toggledrawer();
         }
@@ -131,6 +132,7 @@
 
                     $.ajax({url:"/api/devname",success:function (result2) {
                             $("#title").text(result2+" 的书");
+                            document.title="全部书籍";
                     }});
             }});
             if(draweropen){
@@ -148,6 +150,7 @@
                         }
                     }
                     $("#title").text("搜索结果");
+                    document.title="搜索结果";
             }});
         }
 
