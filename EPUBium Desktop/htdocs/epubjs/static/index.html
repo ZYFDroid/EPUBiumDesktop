@@ -32,6 +32,7 @@
         }
 
     </style>
+    <script src="/common/common.js"></script>
 </head>
 
 
@@ -140,9 +141,6 @@
 
 		// 	});
 
-        window.addEventListener("onkeypress",function(e){
-            console.log(e);
-        });
 
         renderH.on("relocated",
             function (event) {
@@ -219,12 +217,7 @@
         }
         
         mainDoc.document.addEventListener("keyup",function(e){
-            if(e.code=="ArrowUp" || e.code=="ArrowLeft" || e.code=="PageUp"){
-                prev();
-            }
-            if(e.code=="ArrowDown" || e.code=="ArrowRight" || e.code=="PageDown"){
-                next();
-            }
+            eval(keyToDirection(e));
         });
 
         mainDoc.document.addEventListener("mousewheel",function(e){
@@ -267,15 +260,8 @@
     
 
     document.addEventListener("keyup",function(e){
-            if(e.code=="ArrowUp" || e.code=="ArrowLeft" || e.code=="PageUp"){
-                prev();
-                
-            }
-            if(e.code=="ArrowDown" || e.code=="ArrowRight" || e.code=="PageDown"){
-                next();
-                
-            }
-        });
+        eval(keyToDirection(e));
+    });
 
 
 

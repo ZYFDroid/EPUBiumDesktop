@@ -9,6 +9,7 @@
     <script src="/common/lib/jquery-3.6.0.js"></script>
     <script src="/common/lib/vue.js"></script>
     <link rel="stylesheet" href="/common/style.css">
+    <script src="/common/common.js"></script>
     <style>
         .read{
             width: 100%;
@@ -414,12 +415,8 @@
         }
 
         document.addEventListener("keyup",function(e){
-            if(e.code=="ArrowUp" || e.code=="ArrowLeft" || e.code=="PageUp"){
-                prev();
-            }
-            if(e.code=="ArrowDown" || e.code=="ArrowRight" || e.code=="PageDown"){
-                next();
-            }
+            console.log(e);
+            eval(keyToDirection(e));
         });
         
         function prev(){subdoc.window.prev();}
