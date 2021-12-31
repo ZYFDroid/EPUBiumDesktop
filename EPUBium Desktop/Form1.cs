@@ -1,6 +1,6 @@
-﻿using CefSharp;
-using CefSharp.Handler;
-using CefSharp.WinForms;
+﻿
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,43 +18,64 @@ namespace EPUBium_Desktop
 {
     public partial class Form1 : Form
     {
-        ChromiumWebBrowser webView;
+
+
+        CoreWebView2 webView;
+        WebView2 webViewControl;
         public Form1()
         {
             InitializeComponent();
             this.Size = Properties.Settings.Default.windowsize;
             this.Icon = Properties.Resources.icon;
-            CefSettings setting = new CefSettings();
+
+            webViewControl = new WebView2();
+            Task<CoreWebView2Environment> createEnvTask = CoreWebView2Environment.CreateAsync(userDataFolder: Path.GetFullPath("app\\data\\cefdata"));
+            createEnvTask.Wait();
+            CoreWebView2Environment env = createEnvTask.Result;
+            Controls.Add(webViewControl);
+            webViewControl.Dock = DockStyle.Fill;
+            webViewControl.EnsureCoreWebView2Async(env);
+            webViewControl.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
             
-            setting.BrowserSubprocessPath = Application.ExecutablePath;
-            setting.CachePath = Path.GetFullPath("app\\data\\cefdata\\cache");
-            setting.LogFile = Path.GetFullPath("app\\data\\cefdata\\log\\cef" +DateTime.Now.Ticks+".log");
-            setting.PersistUserPreferences = true;
-            setting.UserDataPath = Path.GetFullPath("app\\data\\cefdata\\data");
             Disposed += Form1_Disposed;
-            Cef.Initialize(setting);
-            webView = new ChromiumWebBrowser("about:blank") { 
-                RequestHandler = new LocalhostRequestHandler(),
-                MenuHandler = new DevToolsMenuHandler()
-            };
-            webView.TitleChanged += WebView_TitleChanged;
-            webView.LoadUrlAsync("http://epub.zyf-internal.com");
-            Controls.Add(webView);
+            
         }
 
-        private void WebView_TitleChanged(object sender, TitleChangedEventArgs e)
+        private void WebView2_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                webView = webViewControl.CoreWebView2;
+                initWebView2();
+                webViewControl.Source = new Uri("http://epub.zyf-internal.com");
+            }
+            else
+            {
+                if(e.InitializationException is WebView2RuntimeNotFoundException)
+                {
+                    MessageBox.Show("此计算机上没有安装WebView2运行时。\r\n访问：https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/#download-section 获取运行时","",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    string runtimeDownloadUrl = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/#download-section";
+                    Process.Start(runtimeDownloadUrl);
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show(e.InitializationException.ToString(),"Web页面初始化失败");
+                    Application.Exit();
+                }
+            }
+        }
+        
+        private void WebView_DocumentTitleChanged(object sender, object e)
         {
             Invoke(new Action(() => {
-                this.Text = e.Title + " - EPUBium Desktop " + Application.ProductVersion;
+                this.Text = webView.DocumentTitle + " - EPUBium Desktop " + Application.ProductVersion;
             }));
         }
 
         private void Form1_Disposed(object sender, EventArgs e)
         {
-
-            webView.Dispose();
-            Cef.PreShutdown();
-            Cef.Shutdown();
+            webViewControl.Dispose();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -65,122 +87,104 @@ namespace EPUBium_Desktop
             Properties.Settings.Default.windowsize = this.Size;
             Properties.Settings.Default.Save();
             base.OnFormClosing(e);
-            Controls.Remove(webView);
+            Controls.Remove(webViewControl);
         }
-
-
-    }
-
-    class LocalhostRequestHandler : RequestHandler
-    {
+        void initWebView2()
+        {
+            webView.DocumentTitleChanged += WebView_DocumentTitleChanged;
+            webView.Settings.IsPinchZoomEnabled = false;
+            webView.Settings.IsSwipeNavigationEnabled = true;
+            webView.AddWebResourceRequestedFilter("http://epub.zyf-internal.com/*", CoreWebView2WebResourceContext.All);
+            resourceHandler = new ResourceHandler(webView.Environment);
+            webView.WebResourceRequested += WebView_WebResourceRequested;
+        }
         const string urlbase = "http://epub.zyf-internal.com";
-        private LocalhostResourceHandler lhr = new LocalhostResourceHandler();
-        protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser,
-            IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload,
-            string requestInitiator, ref bool disableDefaultHandling)
+        private void WebView_WebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
         {
-            if (request.Url.StartsWith(urlbase))
-            {
-                return lhr;
-            }
-            return base.GetResourceRequestHandler(chromiumWebBrowser, browser, frame, request, isNavigation, isDownload, requestInitiator, ref disableDefaultHandling);
+            e.Response = handleRequest(e.Request);
+            e.GetDeferral().Complete();
         }
 
-        protected override bool OnOpenUrlFromTab(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, WindowOpenDisposition targetDisposition, bool userGesture)
+        public CoreWebView2WebResourceResponse handleRequest(CoreWebView2WebResourceRequest request)
         {
-            if (targetUrl.StartsWith(urlbase))
+            if (request.Uri.StartsWith(urlbase))
             {
-                return false;
-            }
-            else
-            {
-                if (userGesture)
-                {
-                    Process.Start("explorer", targetUrl);
-                    return true;
-                }
-                return true;
-            }
-        }
-    }
-
-    class LocalhostResourceHandler : ResourceRequestHandler
-    {
-        const string urlbase = "http://epub.zyf-internal.com";
-        protected override IResourceHandler GetResourceHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request)
-        {
-            if (request.Url.StartsWith(urlbase))
-            {
-                string path = request.Url.Substring(urlbase.Length,request.Url.Length - urlbase.Length);
+                string path = request.Uri.Substring(urlbase.Length, request.Uri.Length - urlbase.Length);
                 if (path.StartsWith("/"))
                 {
                     path = path.Substring(1);
                 }
-                if (path == "" || path.EndsWith("/")){
+                if (path == "" || path.EndsWith("/"))
+                {
                     path += "index.html";
                 }
                 string mimetype = "text/html";
                 if (path.Contains("."))
                 {
-                    string ext = path.Substring(path.LastIndexOf(".")).Replace(".","");
+                    string ext = path.Substring(path.LastIndexOf(".")).Replace(".", "");
                     mimetype = System.Web.MimeMapping.GetMimeMapping(path);
                 }
                 if (path.StartsWith("api/") || path.StartsWith("read/"))
                 {
                     ApiResponse resp = Program.ApiModel.callApi(path);
-                    if(resp.type== ApiResponseType.ErrorInternalError) { return ResourceHandler.ForErrorMessage(resp.msg, System.Net.HttpStatusCode.InternalServerError); }
-                    if(resp.type== ApiResponseType.ErrorNotFound) { return ResourceHandler.ForErrorMessage(resp.msg, System.Net.HttpStatusCode.NotFound); }
-                    if(resp.type== ApiResponseType.Stream) {
-                        return ResourceHandler.FromStream(resp.stream, resp.msg, true);
+                    if (resp.type == ApiResponseType.ErrorInternalError) { return resourceHandler.ForErrorMessage(resp.msg, System.Net.HttpStatusCode.InternalServerError); }
+                    if (resp.type == ApiResponseType.ErrorNotFound) { return resourceHandler.ForErrorMessage(resp.msg, System.Net.HttpStatusCode.NotFound); }
+                    if (resp.type == ApiResponseType.Stream)
+                    {
+                        return resourceHandler.FromStream(resp.stream, resp.msg, true);
                     }
                     if (resp.type == ApiResponseType.File)
                     {
-                        return ResourceHandler.FromFilePath(resp.msg, System.Web.MimeMapping.GetMimeMapping(resp.msg), true);
+                        return resourceHandler.FromFilePath(resp.msg, System.Web.MimeMapping.GetMimeMapping(resp.msg), true);
                     }
                     if (resp.type == ApiResponseType.String)
                     {
-                        return ResourceHandler.FromString(resp.msg, Encoding.UTF8, false, "text/html");
+                        return resourceHandler.FromString(resp.msg, Encoding.UTF8, "text/html");
                     }
                 }
                 Stream s = Program.HtDocs.OpenRead(path);
                 if (s != null)
                 {
-                    return ResourceHandler.FromStream(s, mimetype, autoDisposeStream: true);
+                    return resourceHandler.FromStream(s, mimetype, autoDisposeStream: true);
                 }
             }
-            return base.GetResourceHandler(chromiumWebBrowser, browser, frame, request);
+
+            return webView.Environment.CreateWebResourceResponse(null, 403, "Forbidden", "");
+            
         }
+
+        ResourceHandler resourceHandler;
     }
 
-    class DevToolsMenuHandler : ContextMenuHandler
+    internal class ResourceHandler
     {
-        protected override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
+        private CoreWebView2Environment env;
+
+        public ResourceHandler(CoreWebView2Environment env)
         {
-            base.OnBeforeContextMenu(chromiumWebBrowser, browser, frame, parameters, model);
-            model.Clear();
-            model.AddItem(CefMenuCommand.SelectAll, "全选");
-            model.AddItem(CefMenuCommand.Copy, "复制");
-            model.AddItem(CefMenuCommand.Paste, "粘贴");
-            model.AddSeparator();
-            model.AddItem(CefMenuCommand.CustomFirst + 2, "回到主页");
-            model.AddSeparator();
-            model.AddItem(CefMenuCommand.CustomFirst + 1, "检查元素");
+            this.env = env;
         }
 
-        protected override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        internal CoreWebView2WebResourceResponse ForErrorMessage(string errMsg, HttpStatusCode errCode)
         {
-            if (!parameters.IsCustomMenu)
-            {
-                if (commandId == CefMenuCommand.CustomFirst + 1)
-                {
-                    chromiumWebBrowser.ShowDevTools();
-                }
-                if (commandId == CefMenuCommand.CustomFirst + 2)
-                {
-                    chromiumWebBrowser.LoadUrlAsync("http://epub.zyf-internal.com");
-                }
-            }
-            return base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
+            return env.CreateWebResourceResponse(null, (int)errCode, errMsg, "");
+        }
+
+        internal CoreWebView2WebResourceResponse FromFilePath(string path, string mimeType, bool autoClose)
+        {
+            FileStream fileStream = File.OpenRead(path);
+            return env.CreateWebResourceResponse(fileStream, 200, "OK", "Content-Type: " + mimeType);
+        }
+
+        internal CoreWebView2WebResourceResponse FromStream(Stream s, string mimetype, bool autoDisposeStream)
+        {
+            return env.CreateWebResourceResponse(s, 200, "OK", "Content-Type: " + mimetype);
+        }
+
+        internal CoreWebView2WebResourceResponse FromString(string msg, Encoding encoding, string contentType)
+        {
+            MemoryStream ms = new MemoryStream(encoding.GetBytes(msg));
+            return env.CreateWebResourceResponse(ms, 200, "OK", "Content-Type: " + contentType+", charset="+encoding.EncodingName);
         }
     }
 }

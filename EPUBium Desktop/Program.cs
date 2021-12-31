@@ -1,6 +1,6 @@
-﻿using CefSharp.BrowserSubprocess;
-using CefSharp.RenderProcess;
+﻿
 using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Web.WebView2.WinForms;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -30,22 +30,7 @@ namespace EPUBium_Desktop
         [STAThread]
         static int Main(string[] args)
         {
-
-
-
-            if (args.Length > 2)
-            {
-                CefSharp.Cef.EnableHighDPISupport();
-                try
-                {
-                    SelfHost.Main(args);
-                }
-                catch(Exception ex)
-                {
-                    File.WriteAllText("" + DateTime.Now.Ticks+".log", String.Join(" ", args) + Environment.NewLine + ex.ToString());
-                }
-                return 0;
-            }
+            
             try
             {
                 ensureDirectoryExists(
@@ -55,10 +40,6 @@ namespace EPUBium_Desktop
                     "app\\data\\appcache",
                     "app\\data\\appcache\\cover",
                     "app\\data\\cefdata");
-                ensureDirectoryExists("app\\data\\cefdata\\data");
-                ensureDirectoryExists("app\\data\\cefdata\\cache");
-                ensureDirectoryExists("app\\data\\cefdata\\log");
-                ensureDirectoryExists("app\\data\\cefdata\\data");
                 HtDocs = new MyPakFile("htdocs.pak");
                 HtDocs.files.ForEach(f => Console.WriteLine(f));
                 DBUtils = new DBUtils();
