@@ -1,12 +1,11 @@
-﻿
-using ICSharpCode.SharpZipLib.Zip;
+﻿using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Web.WebView2.WinForms;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,18 +29,19 @@ namespace EPUBium_Desktop
         [STAThread]
         static int Main(string[] args)
         {
-            
+
             try
             {
                 ensureDirectoryExists(
-                    "app", 
-                    "app\\data", 
+                    "app",
+                    "app\\data",
+                    "app\\respack",
                     "app\\data\\app",
                     "app\\data\\appcache",
                     "app\\data\\appcache\\cover",
                     "app\\data\\cefdata");
                 HtDocs = new MyPakFile("htdocs.pak");
-                HtDocs.files.ForEach(f => Console.WriteLine(f));
+                loadResPack();
                 DBUtils = new DBUtils();
                 ApiModel = new ApiModel();
                 Application.EnableVisualStyles();
@@ -58,11 +58,59 @@ namespace EPUBium_Desktop
 
         static void ensureDirectoryExists(params string[] paths) => paths.ToList().ForEach(p => { if (!Directory.Exists(p)) { Directory.CreateDirectory(p); } });
 
+
+        private static void loadResPack()
+        {
+            string respack = Properties.Settings.Default.respack;
+            if (respack != null)
+            {
+                try
+                {
+                    if (!File.Exists(Path.Combine(".", "app","respack", respack)))
+                    {
+                        respack = null;
+                    }
+                }
+                catch (Exception ex) { }
+            }
+
+            if(respack == null)
+            {
+                return;
+            }
+
+            try
+            {
+                HtDocs.Overrides = new MyPakFile(Path.Combine(".", "app", "respack", respack));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("加载主题包时发生错误：\r\n"+ex.Message,"主题包加载失败",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                Properties.Settings.Default.respack = "";
+                Properties.Settings.Default.Save();
+                HtDocs.Overrides = null;
+            }
+        }
+    }
+
+    public class JsonConvert
+    {
+        private static System.Web.Script.Serialization.JavaScriptSerializer _jsonConverter =new System.Web.Script.Serialization.JavaScriptSerializer();
+        public static string SerializeObject(object o)
+        {
+            return _jsonConverter.Serialize(o);
+        }
+
+        public static T DeserializeObject<T>(string t)
+        {
+            return _jsonConverter.Deserialize<T>(t);
+        }
     }
 
 
     public class MyPakFile : IDisposable
     {
+        public MyPakFile Overrides = null;
         public string Tag = "";
         public List<string> files = new List<string>();
         ZipFile src;
@@ -84,6 +132,14 @@ namespace EPUBium_Desktop
 
         public Stream OpenRead(string filename)
         {
+            if(Overrides != null)
+            {
+                var r = Overrides.OpenRead(filename);
+                if(r != null)
+                {
+                    return r;
+                }
+            }
             if(files.Contains(filename) && !filename.EndsWith("/"))
             {
                 ZipEntry ze = src.GetEntry(filename);
@@ -202,6 +258,10 @@ namespace EPUBium_Desktop
                     Program.DBUtils.execSql("update library set lastopen=? where uuid=?", JavaSystem.currentTimeMillis(), b.getUUID());
                     return newFixedLengthResponse("<script>window.location.replace('/read/" + b.getUUID() + "/read.html');</script>");
                 }
+            }
+            if (apipath == ("respack"))
+            {
+                return new ApiResponse(ApiResponseType.Event, "respack");
             }
             return new ApiResponse(ApiResponseType.ErrorNotFound, "404 Not Found");
         }
@@ -340,6 +400,7 @@ namespace EPUBium_Desktop
                 openingBook = null;
                 return newFixedLengthResponse("<script>window.location.href='/'</script>");
             }
+            
             return new ApiResponse(ApiResponseType.ErrorNotFound, "404 Not Found");
         }
         private ApiResponse handlePathReadBookRequest(string bookuuid, string api, Dictionary<string, string> param)
@@ -395,7 +456,7 @@ namespace EPUBium_Desktop
     }
     public enum ApiResponseType
     {
-        String,File,Stream,ErrorNotFound,ErrorInternalError
+        String,File,Stream,ErrorNotFound,ErrorInternalError,Event
     }
 
     static class XmlUtils

@@ -54,6 +54,7 @@
                     <div class="uppermenu">选项</div>
                     <div class="drawermenuitems">
                         <div class="menuitem darkhover" style="background-image: url(/common/img/add.png);" onclick="scanbook()">扫描书籍</div>
+                        <div class="menuitem darkhover" style="background-image: url(/common/img/theme.png);" onclick="changetheme()">更换主题包</div>
                     </div>
                 </div>
             </div>
@@ -185,6 +186,18 @@
                     toast("扫描出错");
                     loadAll();
                     loadFolder();
+                }
+            });
+        }
+
+        function changetheme(){
+            $.ajax({
+                url:"/api/respack",
+                success:function (result) {
+                   
+                },
+                err:function(a,b,c){
+                    toast("不支持更换主题包");
                 }
             });
         }

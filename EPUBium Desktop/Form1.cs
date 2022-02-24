@@ -25,9 +25,9 @@ namespace EPUBium_Desktop
         public Form1()
         {
             InitializeComponent();
-            this.Size = Properties.Settings.Default.windowsize;
+            this.BackColor = Color.White;
             this.Icon = Properties.Resources.icon;
-
+            
             webViewControl = new WebView2();
             Task<CoreWebView2Environment> createEnvTask = CoreWebView2Environment.CreateAsync(userDataFolder: Path.GetFullPath("app\\data\\cefdata"));
             createEnvTask.Wait();
@@ -48,13 +48,14 @@ namespace EPUBium_Desktop
                 webView = webViewControl.CoreWebView2;
                 initWebView2();
                 webViewControl.Source = new Uri("http://epub.zyf-internal.com");
+                webViewControl.NavigationCompleted += WebViewControl_NavigationCompleted;
             }
             else
             {
                 if(e.InitializationException is WebView2RuntimeNotFoundException)
                 {
-                    MessageBox.Show("此计算机上没有安装WebView2运行时。\r\n访问：https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/#download-section 获取运行时","",MessageBoxButtons.OK,MessageBoxIcon.Warning);
-                    string runtimeDownloadUrl = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/#download-section";
+                    MessageBox.Show("此计算机上没有安装WebView2运行时。\r\n访问：https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/consumer/ 获取运行时", "",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    string runtimeDownloadUrl = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/consumer/";
                     Process.Start(runtimeDownloadUrl);
                     Application.Exit();
                 }
@@ -65,7 +66,12 @@ namespace EPUBium_Desktop
                 }
             }
         }
-        
+
+        private void WebViewControl_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            
+        }
+
         private void WebView_DocumentTitleChanged(object sender, object e)
         {
             Invoke(new Action(() => {
@@ -80,11 +86,34 @@ namespace EPUBium_Desktop
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.Size = Properties.Settings.Default.windowsize;
+            this.Location = Properties.Settings.Default.windowloc;
+            this.WindowState = Properties.Settings.Default.ismaxium ? FormWindowState.Maximized : FormWindowState.Normal;
+            Rectangle workingArea = Screen.FromControl(this).WorkingArea;
+            if (!workingArea.Contains(this.Location))
+            {
+                this.Location = workingArea.Location;
+            } 
+        }
+
+        void handleEvent(string eventType)
+        {
+            switch (eventType)
+            {
+                case "respack":
+                    BeginInvoke(new Action(() => { new FrmChangeResource().ShowDialog(this); }));
+                    break;
+                default:
+                    MessageBox.Show("未知Event："+eventType);
+                    break;
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             Properties.Settings.Default.windowsize = this.Size;
+            Properties.Settings.Default.windowloc = this.Location;
+            Properties.Settings.Default.ismaxium = this.WindowState == FormWindowState.Maximized;
             Properties.Settings.Default.Save();
             base.OnFormClosing(e);
             Controls.Remove(webViewControl);
@@ -93,7 +122,7 @@ namespace EPUBium_Desktop
         {
             webView.DocumentTitleChanged += WebView_DocumentTitleChanged;
             webView.Settings.IsPinchZoomEnabled = false;
-            webView.Settings.IsSwipeNavigationEnabled = true;
+            webView.Settings.IsSwipeNavigationEnabled = false;
             webView.AddWebResourceRequestedFilter("http://epub.zyf-internal.com/*", CoreWebView2WebResourceContext.All);
             resourceHandler = new ResourceHandler(webView.Environment);
             webView.WebResourceRequested += WebView_WebResourceRequested;
@@ -140,6 +169,11 @@ namespace EPUBium_Desktop
                     if (resp.type == ApiResponseType.String)
                     {
                         return resourceHandler.FromString(resp.msg, Encoding.UTF8, "text/html");
+                    }
+                    if(resp.type == ApiResponseType.Event)
+                    {
+                        handleEvent(resp.msg);
+                        return resourceHandler.FromString("OK",Encoding.UTF8, "text/html");
                     }
                 }
                 Stream s = Program.HtDocs.OpenRead(path);

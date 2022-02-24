@@ -33,11 +33,12 @@ namespace EPUBium_Desktop
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(978, 694);
-            this.MinimumSize = new System.Drawing.Size(420, 640);
+            this.ClientSize = new System.Drawing.Size(1956, 1388);
+            this.Margin = new System.Windows.Forms.Padding(6);
+            this.MinimumSize = new System.Drawing.Size(814, 1209);
             this.Name = "Form1";
             this.Text = "EPUBium Desktop";
             this.Load += new System.EventHandler(this.Form1_Load);
