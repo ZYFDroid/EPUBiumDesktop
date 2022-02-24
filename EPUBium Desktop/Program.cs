@@ -22,7 +22,7 @@ namespace EPUBium_Desktop
         /// </summary>
         /// 
 
-        public static MyPakFile HtDocs = null;
+        public static IPakFile HtDocs = null;
         public static DBUtils DBUtils = null;
         public static ApiModel ApiModel = null;
 
@@ -107,13 +107,22 @@ namespace EPUBium_Desktop
         }
     }
 
-
-    public class MyPakFile : IDisposable
+    public interface IPakFile : IDisposable
     {
-        public MyPakFile Overrides = null;
+        IPakFile Overrides { get; set; }
+
+        Stream OpenRead(string path);
+    }
+
+    public class MyPakFile : IPakFile
+    {
+        
         public string Tag = "";
         public List<string> files = new List<string>();
         ZipFile src;
+
+        public IPakFile Overrides { get ; set ; }
+
         public MyPakFile(string path)
         {
             ICSharpCode.SharpZipLib.Zip.ZipStrings.UseUnicode = true;
@@ -130,7 +139,7 @@ namespace EPUBium_Desktop
             }
         }
 
-        public Stream OpenRead(string filename)
+        public virtual Stream OpenRead(string filename)
         {
             if(Overrides != null)
             {
@@ -151,6 +160,43 @@ namespace EPUBium_Desktop
         public void Dispose()
         {
             ((IDisposable)src).Dispose();
+        }
+    }
+
+    public class LocalDirRoot : IPakFile
+    {
+        private string root;
+        public LocalDirRoot(string path)
+        {
+            root = path;
+        }
+
+        public IPakFile Overrides { get; set; }
+
+        public void Dispose()
+        {
+        }
+
+        public Stream OpenRead(string path)
+        {
+            string filepath = Path.Combine(root, path);
+            if (!File.Exists(filepath))
+            {
+                return null;
+            }
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+                using(FileStream fs = File.OpenRead(filepath))
+                {
+                    fs.CopyTo(ms);
+                }
+                ms.Seek(0, SeekOrigin.Begin);
+                return ms;
+            }catch(Exception)
+            {
+                return null;
+            }  
         }
     }
 

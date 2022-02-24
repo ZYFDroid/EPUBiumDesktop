@@ -189,7 +189,19 @@ namespace EPUBium_Desktop
         {
             Properties.Settings.Default.respack = key;
             Properties.Settings.Default.Save();
-            MessageBox.Show(this,"主题包已应用。重启软件生效");
+            if(key == null || key.Length == 0)
+            {
+
+                Program.HtDocs.Overrides?.Dispose();
+                Program.HtDocs.Overrides = null;
+            }
+            else
+            {
+
+                string path = Path.GetFullPath(Path.Combine(".", "app", "respack", key));
+                Program.HtDocs.Overrides = new MyPakFile(path);
+            }
+            MessageBox.Show(this,"主题包已应用。在界面上右键刷新生效");
         }
 
         private void btnOpenDir_Click(object sender, EventArgs e)
@@ -217,8 +229,12 @@ namespace EPUBium_Desktop
 
         private void btnRestart_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(Application.ExecutablePath);
-            Application.Exit();
+            MessageBox.Show(this, "开发模式可以指定本地的一个目录作为资源包的根目录，应用后刷新生效，重启或点击恢复默认按钮可还原。");
+            if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
+            {
+                Program.HtDocs.Overrides = new LocalDirRoot(Path.GetDirectoryName(openFileDialog1.FileName));
+                MessageBox.Show(this, "主题包已应用。在界面上右键刷新生效");
+            }
         }
     }
 }
