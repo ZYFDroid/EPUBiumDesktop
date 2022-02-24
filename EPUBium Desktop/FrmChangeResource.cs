@@ -86,8 +86,14 @@ namespace EPUBium_Desktop
                                         resPackInfo.metadata = new ResPackMeta();
                                     }
                                 }
-                                resPackInfo.metadata.safeValue(file);
                             }
+                            else
+                            {
+                                resPackInfo.metadata = new ResPackMeta();
+                                
+                            }
+
+                            resPackInfo.metadata.safeValue(file);
                         }
                         catch { }
                     }
@@ -122,21 +128,23 @@ namespace EPUBium_Desktop
 
             public void safeValue(string filename)
             {
-                name = name.Trim() == "" ? null : name;
-                description = description.Trim() == "" ? null : description;
-                author = author.Trim() == "" ? null : author;
-                version = name.Trim() == "" ? null : version;
-                link = name.Trim() == "" ? null : link;
-
                 name = name ?? Path.GetFileName(filename);
                 description = description ?? "";
                 author = author ?? "";
                 version = version ?? "";
                 link = link ?? "";
+
+                name = name.Trim() == "" ? Path.GetFileName(filename) : name;
+
+
             }
 
             public override string ToString()
             {
+                if(version == "" || author == "")
+                {
+                    return $"{name}\r\n \r\n ";
+                }
                 return $"{name} v{version}\r\n{description}\r\n作者：{author}";
             }
         }

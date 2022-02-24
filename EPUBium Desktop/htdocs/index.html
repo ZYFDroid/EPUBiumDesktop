@@ -113,11 +113,15 @@
         });
         
         $(function (){
+            loadFolderList();
+            loadAll();
+        })
+
+        function loadFolderList(){
             $.ajax({url:"/api/folders",success:function (result) {
                 menuController.folders = JSON.parse(result);
             }});
-            loadAll();
-        })
+        }
 
         function loadFolder(folder){
             $.ajax({url:"/api/folder/"+folder.UUID,success:function (result) {
@@ -180,12 +184,12 @@
                     unblockloading();
                     toast(result);
                     loadAll();
-                    loadFolder();
+                    loadFolderList();
                 },
                 err:function(a,b,c){
                     toast("扫描出错");
                     loadAll();
-                    loadFolder();
+                    loadFolderList();
                 }
             });
         }

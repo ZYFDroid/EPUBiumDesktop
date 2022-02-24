@@ -123,17 +123,27 @@ namespace EPUBium_Desktop
             webView.DocumentTitleChanged += WebView_DocumentTitleChanged;
             webView.Settings.IsPinchZoomEnabled = false;
             webView.Settings.IsSwipeNavigationEnabled = false;
-            webView.AddWebResourceRequestedFilter("http://epub.zyf-internal.com/*", CoreWebView2WebResourceContext.All);
+            webView.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
             resourceHandler = new ResourceHandler(webView.Environment);
             webView.WebResourceRequested += WebView_WebResourceRequested;
+            webView.FrameNavigationStarting += WebView_FrameNavigationStarting;
         }
+
+        private void WebView_FrameNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            if (!e.Uri.StartsWith(urlbase))
+            {
+                e.Cancel = true;
+            }
+        }
+
         const string urlbase = "http://epub.zyf-internal.com";
         private void WebView_WebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
         {
             e.Response = handleRequest(e.Request);
             e.GetDeferral().Complete();
         }
-
+        
         public CoreWebView2WebResourceResponse handleRequest(CoreWebView2WebResourceRequest request)
         {
             if (request.Uri.StartsWith(urlbase))
