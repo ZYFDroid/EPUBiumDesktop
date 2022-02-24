@@ -216,6 +216,10 @@ namespace EPUBium_Desktop
 
         private void btnDefault_Click(object sender, EventArgs e)
         {
+            if (Properties.Settings.Default.ThemeDevMode)
+            {
+                Properties.Settings.Default.ThemeDevMode = false;
+            }
             setTheme("");
         }
 
@@ -229,12 +233,23 @@ namespace EPUBium_Desktop
 
         private void btnRestart_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "开发模式可以指定本地的一个目录作为资源包的根目录，应用后刷新生效，重启或点击恢复默认按钮可还原。");
-            if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
+            if (MessageBox.Show("点击确认将使用本地端口，取消将使用本地文件","本地文件/端口选择",
+               MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                Program.HtDocs.Overrides = new LocalDirRoot(Path.GetDirectoryName(openFileDialog1.FileName));
-                MessageBox.Show(this, "主题包已应用。在界面上右键刷新生效");
+                MessageBox.Show(this, "已开启开发模式，网页 http://localhost:8080 将作为主题，应用后刷新生效，重启或点击恢复默认按钮可还原。");
+
+                Properties.Settings.Default.ThemeDevMode = true;
             }
+            else
+            {
+                MessageBox.Show(this, "请指定本地的一个目录作为资源包的根目录，应用后刷新生效，重启或点击恢复默认按钮可还原。");
+                if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
+                {
+                    Program.HtDocs.Overrides = new LocalDirRoot(Path.GetDirectoryName(openFileDialog1.FileName));
+                    MessageBox.Show(this, "主题包已应用。在界面上右键刷新生效");
+                }
+            }
+            
         }
     }
 }

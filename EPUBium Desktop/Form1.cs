@@ -186,10 +186,42 @@ namespace EPUBium_Desktop
                         return resourceHandler.FromString("OK",Encoding.UTF8, "text/html");
                     }
                 }
-                Stream s = Program.HtDocs.OpenRead(path);
-                if (s != null)
+
+                if (Properties.Settings.Default.ThemeDevMode)
                 {
-                    return resourceHandler.FromStream(s, mimetype, autoDisposeStream: true);
+                        HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://localhost:8080/" + path);
+
+                        req.Method = "GET";
+
+                        req.ContentType = "text/html;charset=UTF-8";
+
+                        req.UserAgent = null;
+
+                        // request.Timeout = Timeout;
+
+                        HttpWebResponse response = (HttpWebResponse)req.GetResponse();
+
+                        ////获得Response的流
+
+                        Stream myResponseStream = response.GetResponseStream();
+
+                        if (myResponseStream != null)
+                        {
+                            return resourceHandler.FromStream(myResponseStream, mimetype, autoDisposeStream: true);
+                        }
+
+                        //读取完成  关闭数据流
+
+                        myResponseStream.Close();
+                }
+                else
+                {
+                    Stream s = Program.HtDocs.OpenRead(path);
+                    if (s != null)
+                    {
+                        return resourceHandler.FromStream(s, mimetype, autoDisposeStream: true);
+                    }
+
                 }
             }
 
@@ -198,6 +230,12 @@ namespace EPUBium_Desktop
         }
 
         ResourceHandler resourceHandler;
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.ThemeDevMode = false;
+            Properties.Settings.Default.Save();
+        }
     }
 
     internal class ResourceHandler
