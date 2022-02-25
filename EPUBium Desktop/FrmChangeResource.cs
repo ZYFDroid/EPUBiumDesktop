@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Net;
 
 namespace EPUBium_Desktop
 {
@@ -227,13 +228,81 @@ namespace EPUBium_Desktop
             }
         }
 
-        private void btnRestart_Click(object sender, EventArgs e)
+        private void btnThemeDev_Click(object sender, EventArgs e)
+        {
+            mnuDevMode.Show(btnThemeDev, 0, btnThemeDev.Height);
+        }
+
+        private void mnuThemeDevUseDir_Click(object sender, EventArgs e)
         {
             MessageBox.Show(this, "开发模式可以指定本地的一个目录作为资源包的根目录，应用后刷新生效，重启或点击恢复默认按钮可还原。");
             if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
             {
+                Program.HtDocs.Overrides?.Dispose();
                 Program.HtDocs.Overrides = new LocalDirRoot(Path.GetDirectoryName(openFileDialog1.FileName));
                 MessageBox.Show(this, "主题包已应用。在界面上右键刷新生效");
+            }
+        }
+
+        private void mnuThemeDevUseUrl_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "开发模式可以指定一个URL作为资源包的根目录，应用后刷新生效，重启或点击恢复默认按钮可还原。");
+            string url = InputDialog.Input(this, "请输入url根目录",Properties.Settings.Default.devLastUrl ?? "");
+            if (url != null)
+            {
+                if (url.StartsWith("http") && url.Contains("://"))
+                {
+                    Program.HtDocs.Overrides?.Dispose();
+                    Program.HtDocs.Overrides = new UrlPackFile(url);
+                    Properties.Settings.Default.devLastUrl = url;
+                    Properties.Settings.Default.Save();
+                    MessageBox.Show(this, "主题包已应用。在界面上右键刷新生效");
+                }
+                else
+                {
+                    MessageBox.Show("无效的URL路径");
+                }
+            }
+        }
+    }
+
+    class UrlPackFile : IPakFile
+    {
+
+        private string urlRoot;
+
+        public UrlPackFile(string urlRoot)
+        {
+            if (urlRoot.EndsWith("/"))
+            {
+                urlRoot = urlRoot.Substring(0, urlRoot.Length - 1);
+            }
+            this.urlRoot = urlRoot;
+        }
+
+        public IPakFile Overrides { get; set; }
+
+        public void Dispose()
+        {
+            try
+            {
+                webClient.Dispose();
+            }catch { }
+        }
+        private WebClient webClient = new WebClient();
+        public Stream OpenRead(string path)
+        {
+            if (path.StartsWith("/"))
+            {
+                path = path.Substring(1);
+            }
+            string url = urlRoot + "/" + path;
+            try
+            {
+                return webClient.OpenRead(url);
+            }catch 
+            {
+                return null;
             }
         }
     }

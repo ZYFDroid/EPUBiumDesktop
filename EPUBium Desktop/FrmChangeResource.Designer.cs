@@ -28,17 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmChangeResource));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnDefault = new System.Windows.Forms.Button();
             this.btnUse = new System.Windows.Forms.Button();
             this.btnOpenDir = new System.Windows.Forms.Button();
-            this.btnRestart = new System.Windows.Forms.Button();
+            this.btnThemeDev = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tblItems = new System.Windows.Forms.DataGridView();
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -46,9 +47,13 @@
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewLinkColumn();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.mnuDevMode = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuThemeDevUseDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuThemeDevUseUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tblItems)).BeginInit();
+            this.mnuDevMode.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -88,7 +93,7 @@
             this.tableLayoutPanel2.Controls.Add(this.btnDefault, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnUse, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnOpenDir, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.btnRestart, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.btnThemeDev, 1, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 793);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -134,17 +139,17 @@
             this.btnOpenDir.UseVisualStyleBackColor = true;
             this.btnOpenDir.Click += new System.EventHandler(this.btnOpenDir_Click);
             // 
-            // btnRestart
+            // btnThemeDev
             // 
-            this.btnRestart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnRestart.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.btnRestart.Location = new System.Drawing.Point(393, 63);
-            this.btnRestart.Name = "btnRestart";
-            this.btnRestart.Size = new System.Drawing.Size(384, 54);
-            this.btnRestart.TabIndex = 1;
-            this.btnRestart.Text = "主题包开发模式";
-            this.btnRestart.UseVisualStyleBackColor = true;
-            this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
+            this.btnThemeDev.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnThemeDev.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnThemeDev.Location = new System.Drawing.Point(393, 63);
+            this.btnThemeDev.Name = "btnThemeDev";
+            this.btnThemeDev.Size = new System.Drawing.Size(384, 54);
+            this.btnThemeDev.TabIndex = 1;
+            this.btnThemeDev.Text = "主题包开发模式";
+            this.btnThemeDev.UseVisualStyleBackColor = true;
+            this.btnThemeDev.Click += new System.EventHandler(this.btnThemeDev_Click);
             // 
             // label1
             // 
@@ -198,14 +203,14 @@
             // 
             // Column1
             // 
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle16.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle16.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle16.NullValue = ((object)(resources.GetObject("dataGridViewCellStyle16.NullValue")));
-            dataGridViewCellStyle16.Padding = new System.Windows.Forms.Padding(32);
-            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.Color.Black;
-            this.Column1.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle4.NullValue = ((object)(resources.GetObject("dataGridViewCellStyle4.NullValue")));
+            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(32);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.Black;
+            this.Column1.DefaultCellStyle = dataGridViewCellStyle4;
             this.Column1.HeaderText = "Column1";
             this.Column1.Image = global::EPUBium_Desktop.Properties.Resources._default;
             this.Column1.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom;
@@ -218,13 +223,13 @@
             // Column2
             // 
             this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle17.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle17.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.Column2.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.Column2.DefaultCellStyle = dataGridViewCellStyle5;
             this.Column2.HeaderText = "Column2";
             this.Column2.MinimumWidth = 10;
             this.Column2.Name = "Column2";
@@ -233,13 +238,13 @@
             // 
             // Column3
             // 
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomRight;
-            dataGridViewCellStyle18.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle18.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle18.Padding = new System.Windows.Forms.Padding(0, 0, 20, 20);
-            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.Color.Black;
-            this.Column3.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomRight;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle6.Padding = new System.Windows.Forms.Padding(0, 0, 20, 20);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.Black;
+            this.Column3.DefaultCellStyle = dataGridViewCellStyle6;
             this.Column3.HeaderText = "Column3";
             this.Column3.MinimumWidth = 10;
             this.Column3.Name = "Column3";
@@ -251,6 +256,29 @@
             // 
             this.openFileDialog1.Filter = "资源包描述文件|meta.json|资源包图标|pack.png";
             this.openFileDialog1.Title = "选择资源包的文件";
+            // 
+            // mnuDevMode
+            // 
+            this.mnuDevMode.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.mnuDevMode.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuThemeDevUseDir,
+            this.mnuThemeDevUseUrl});
+            this.mnuDevMode.Name = "mnuDevMode";
+            this.mnuDevMode.Size = new System.Drawing.Size(301, 124);
+            // 
+            // mnuThemeDevUseDir
+            // 
+            this.mnuThemeDevUseDir.Name = "mnuThemeDevUseDir";
+            this.mnuThemeDevUseDir.Size = new System.Drawing.Size(300, 38);
+            this.mnuThemeDevUseDir.Text = "使用本地文件夹";
+            this.mnuThemeDevUseDir.Click += new System.EventHandler(this.mnuThemeDevUseDir_Click);
+            // 
+            // mnuThemeDevUseUrl
+            // 
+            this.mnuThemeDevUseUrl.Name = "mnuThemeDevUseUrl";
+            this.mnuThemeDevUseUrl.Size = new System.Drawing.Size(300, 38);
+            this.mnuThemeDevUseUrl.Text = "使用http路径";
+            this.mnuThemeDevUseUrl.Click += new System.EventHandler(this.mnuThemeDevUseUrl_Click);
             // 
             // FrmChangeResource
             // 
@@ -271,6 +299,7 @@
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.tblItems)).EndInit();
+            this.mnuDevMode.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -285,12 +314,15 @@
         private System.Windows.Forms.Button btnUse;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnOpenDir;
-        private System.Windows.Forms.Button btnRestart;
+        private System.Windows.Forms.Button btnThemeDev;
         private System.Windows.Forms.DataGridView tblItems;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewImageColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewLinkColumn Column3;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.ContextMenuStrip mnuDevMode;
+        private System.Windows.Forms.ToolStripMenuItem mnuThemeDevUseDir;
+        private System.Windows.Forms.ToolStripMenuItem mnuThemeDevUseUrl;
     }
 }

@@ -91,5 +91,17 @@ namespace EPUBium_Desktop.Properties {
                 return ((bool)(this["EnableWindowsFormsHighDpiAutoResizing"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8080")]
+        public string devLastUrl {
+            get {
+                return ((string)(this["devLastUrl"]));
+            }
+            set {
+                this["devLastUrl"] = value;
+            }
+        }
     }
 }
