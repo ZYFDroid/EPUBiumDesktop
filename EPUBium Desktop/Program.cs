@@ -47,9 +47,11 @@ namespace EPUBium_Desktop
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new Form1());
+                
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.ToString(),"出现错误");
                 File.WriteAllText("" + DateTime.Now.Ticks + ".log", String.Join(" ", args) + Environment.NewLine + ex.ToString());
                 return 127;
             }

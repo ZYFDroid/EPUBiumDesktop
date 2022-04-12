@@ -27,16 +27,26 @@ namespace EPUBium_Desktop
             InitializeComponent();
             this.BackColor = Color.White;
             this.Icon = Properties.Resources.icon;
-            
-            webViewControl = new WebView2();
-            Task<CoreWebView2Environment> createEnvTask = CoreWebView2Environment.CreateAsync(userDataFolder: Path.GetFullPath("app\\data\\cefdata"));
-            createEnvTask.Wait();
-            CoreWebView2Environment env = createEnvTask.Result;
-            Controls.Add(webViewControl);
-            webViewControl.Dock = DockStyle.Fill;
-            webViewControl.EnsureCoreWebView2Async(env);
-            webViewControl.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
-            
+            try
+            {
+                webViewControl = new WebView2();
+                Task<CoreWebView2Environment> createEnvTask = CoreWebView2Environment.CreateAsync(userDataFolder: Path.GetFullPath("app\\data\\cefdata"));
+                createEnvTask.Wait();
+                CoreWebView2Environment env = createEnvTask.Result;
+                Controls.Add(webViewControl);
+                webViewControl.Dock = DockStyle.Fill;
+                webViewControl.EnsureCoreWebView2Async(env);
+                webViewControl.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
+            }catch (Exception ex)
+            {
+                if(ex.InnerException is WebView2RuntimeNotFoundException)
+                {
+                    MessageBox.Show("此计算机上没有安装WebView2运行时。\r\n访问：https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/consumer/ 获取运行时", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    string runtimeDownloadUrl = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/consumer/";
+                    Process.Start(runtimeDownloadUrl);
+                    Application.Exit();
+                }
+            }
             Disposed += Form1_Disposed;
             
         }

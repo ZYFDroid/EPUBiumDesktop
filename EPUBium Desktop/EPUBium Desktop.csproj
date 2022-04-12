@@ -64,6 +64,25 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.3.3.11, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.3.3\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -161,36 +180,6 @@
     <None Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="htdocs\common\img\bg_drawer_head.png" />
-    <Content Include="htdocs\common\img\bm_bg.png" />
-    <Content Include="htdocs\common\img\ic_launcher_round.png" />
-    <Content Include="htdocs\common\img\ic_list_go.png" />
-    <Content Include="htdocs\common\img\ic_menu_about.png" />
-    <Content Include="htdocs\common\img\ic_menu_bookmark.png" />
-    <Content Include="htdocs\common\img\ic_menu_bookmark_lock.png" />
-    <Content Include="htdocs\common\img\ic_menu_bookmark_unlock.png" />
-    <Content Include="htdocs\common\img\ic_menu_chapters.png" />
-    <Content Include="htdocs\common\img\ic_menu_daylight.png" />
-    <Content Include="htdocs\common\img\ic_menu_folder.png" />
-    <Content Include="htdocs\common\img\ic_menu_load.png" />
-    <Content Include="htdocs\common\img\ic_menu_reload.png" />
-    <Content Include="htdocs\common\img\ic_menu_rescan.png" />
-    <Content Include="htdocs\common\img\ic_menu_save.png" />
-    <Content Include="htdocs\common\img\ic_menu_searchinlibrary.png" />
-    <Content Include="htdocs\common\img\ic_menu_setting.png" />
-    <Content Include="htdocs\common\img\ic_menu_textsize.png" />
-    <Content Include="htdocs\common\img\menu.png" />
-    <Content Include="htdocs\common\img\slider_handle.png" />
-    <Content Include="htdocs\common\lib\jquery-3.6.0.js" />
-    <Content Include="htdocs\common\lib\sweetalert.min.js" />
-    <Content Include="htdocs\common\lib\vue-lazyload.js" />
-    <Content Include="htdocs\common\lib\vue.js" />
-    <Content Include="htdocs\common\style.css" />
-    <Content Include="htdocs\epubjs\read.html" />
-    <Content Include="htdocs\epubjs\static\epub.js" />
-    <Content Include="htdocs\epubjs\static\index.html" />
-    <Content Include="htdocs\favicon.ico" />
-    <Content Include="htdocs\index.html" />
     <None Include="Resources\default.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
