@@ -51,13 +51,20 @@ namespace EPUBium_Desktop
             
         }
 
+        private string startUrl = null;
+
+        public Form1(string startUrl) : this()
+        {
+            this.startUrl = startUrl;
+        }
+
         private void WebView2_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
             if (e.IsSuccess)
             {
                 webView = webViewControl.CoreWebView2;
                 initWebView2();
-                webViewControl.Source = new Uri("http://epub.zyf-internal.com");
+                webViewControl.Source = new Uri(startUrl ?? "http://epub.zyf-internal.com");
                 webViewControl.NavigationCompleted += WebViewControl_NavigationCompleted;
             }
             else
@@ -137,6 +144,29 @@ namespace EPUBium_Desktop
             resourceHandler = new ResourceHandler(webView.Environment);
             webView.WebResourceRequested += WebView_WebResourceRequested;
             webView.FrameNavigationStarting += WebView_FrameNavigationStarting;
+            webView.ContextMenuRequested += WebView_ContextMenuRequested;
+            webView.NewWindowRequested += WebView_NewWindowRequested;
+        }
+
+        private void WebView_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            if (e.Uri.StartsWith(urlbase))
+            {
+                e.Handled = true;
+                new Form1(e.Uri).Show();
+            }
+        }
+
+        private void WebView_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
+        {
+            CoreWebView2ContextMenuItem changeSkin = webView.Environment.CreateContextMenuItem("更换主题包", null, CoreWebView2ContextMenuItemKind.Command);
+            changeSkin.CustomItemSelected += onChangeSkinClicked;
+            e.MenuItems.Add(changeSkin);
+        }
+
+        private void onChangeSkinClicked(object sender, object e)
+        {
+            new FrmChangeResource().ShowDialog(this);
         }
 
         private void WebView_FrameNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)

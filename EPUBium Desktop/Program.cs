@@ -32,6 +32,28 @@ namespace EPUBium_Desktop
 
             try
             {
+                string bookToOpen = null;
+                if(args.Length != 0)
+                {
+                    try
+                    {
+                        bookToOpen = Path.GetFullPath(args[0]);
+                    }catch(Exception ex) { }
+                }
+                Environment.CurrentDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+                if(bookToOpen != null)
+                {
+                    if (File.Exists(bookToOpen))
+                    {
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("系统找不到指定的文件:"+bookToOpen,Application.ProductName);
+                        return 114;
+                    }
+                }             
+
                 ensureDirectoryExists(
                     "app",
                     "app\\data",
@@ -44,9 +66,19 @@ namespace EPUBium_Desktop
                 loadResPack();
                 DBUtils = new DBUtils();
                 ApiModel = new ApiModel();
+                ApiModel.OpenFromFilePath = bookToOpen;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new Form1());
+                if(bookToOpen != null)
+                {
+
+                    Application.Run(new Form1("http://epub.zyf-internal.com/read/SHELL/read.html"));
+                }
+                else
+                {
+
+                    Application.Run(new Form1());
+                }
                 
             }
             catch (Exception ex)
@@ -205,6 +237,9 @@ namespace EPUBium_Desktop
     public class ApiModel
     {
         private MyPakFile openingBook = null;
+
+        public string OpenFromFilePath = null;
+
 
         public ApiResponse callApi(string pathWithUrl)
         {
@@ -418,19 +453,34 @@ namespace EPUBium_Desktop
             return new ApiResponse(ApiResponseType.ErrorNotFound, "404 Not Found");
         }
         Context appContext = null;
+
+        const string OpenFromFileUUID = "shell";
+
         private ApiResponse handlePathReadApiRequest(string bookuuid, string api, Dictionary<string, string> param)
         {
             if (api.StartsWith("bmload/"))
             {
+                if(bookuuid.ToLower() == OpenFromFileUUID)
+                {
+                    return newFixedLengthResponse(JsonConvert.SerializeObject(new BookMark(-1, bookuuid, 0, "", "无存档", -1)));
+                }
                 int requestId = int.Parse(api.Replace("bmload/",""));
                 return newFixedLengthResponse(JsonConvert.SerializeObject(Program.DBUtils.queryBookmarks(appContext, bookuuid)[requestId]));
             }
             if (api==("bmloadall"))
             {
+                if (bookuuid.ToLower() == OpenFromFileUUID)
+                {
+                    return newFixedLengthResponse("[]");
+                }
                 return newFixedLengthResponse(JsonConvert.SerializeObject(Program.DBUtils.queryBookmarks(appContext, bookuuid)));
             }
             if (api.StartsWith("bmsave/"))
             {
+                if (bookuuid.ToLower() == OpenFromFileUUID)
+                {
+                    return newFixedLengthResponse("OK");
+                }
                 int requestId = int.Parse(api.Replace("bmsave/", ""));
                 
                 String name = param["name"];
@@ -440,6 +490,10 @@ namespace EPUBium_Desktop
             }
             if (api==("bookname"))
             {
+                if (bookuuid.ToLower() == OpenFromFileUUID)
+                {
+                    return newFixedLengthResponse((OpenFromFilePath)) ;
+                }
                 return newFixedLengthResponse(Program.DBUtils.queryBooks("uuid = ?", bookuuid).First().getDisplayName());
             }
             if (api == ("close"))
@@ -463,11 +517,21 @@ namespace EPUBium_Desktop
             }
             if (openingBook == null)
             {
-                string path = Program.DBUtils.queryBooks("uuid = ?", bookuuid).First().getPath();
-                openingBook = new MyPakFile(path)
+                if (bookuuid.ToLower() == OpenFromFileUUID)
                 {
-                    Tag = bookuuid
-                };
+                    openingBook = new MyPakFile(OpenFromFilePath)
+                    {
+                        Tag = bookuuid
+                    };
+                }
+                else
+                {
+                    string path = Program.DBUtils.queryBooks("uuid = ?", bookuuid).First().getPath();
+                    openingBook = new MyPakFile(path)
+                    {
+                        Tag = bookuuid
+                    };
+                }
             }
             api = HttpUtility.UrlDecode(api);
             Stream stream = openingBook.OpenRead(api);
