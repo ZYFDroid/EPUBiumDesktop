@@ -52,10 +52,12 @@ namespace EPUBium_Desktop
         }
 
         private string startUrl = null;
+        private bool isSubWindow = false;
 
         public Form1(string startUrl) : this()
         {
             this.startUrl = startUrl;
+            isSubWindow = true;
         }
 
         private void WebView2_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
@@ -128,10 +130,13 @@ namespace EPUBium_Desktop
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            Properties.Settings.Default.windowsize = this.Size;
-            Properties.Settings.Default.windowloc = this.Location;
-            Properties.Settings.Default.ismaxium = this.WindowState == FormWindowState.Maximized;
-            Properties.Settings.Default.Save();
+            if (!isSubWindow)
+            {
+                Properties.Settings.Default.windowsize = this.Size;
+                Properties.Settings.Default.windowloc = this.Location;
+                Properties.Settings.Default.ismaxium = this.WindowState == FormWindowState.Maximized;
+                Properties.Settings.Default.Save();
+            }
             base.OnFormClosing(e);
             Controls.Remove(webViewControl);
         }
@@ -159,6 +164,19 @@ namespace EPUBium_Desktop
 
         private void WebView_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
         {
+            if(e.ContextMenuTarget.Kind == CoreWebView2ContextMenuTargetKind.Image)
+            {
+                string imageUrl = e.ContextMenuTarget.SourceUri != null ? e.ContextMenuTarget.SourceUri.ToString() : null;
+                if(imageUrl != null)
+                {
+                    CoreWebView2ContextMenuItem showBigImage = webView.Environment.CreateContextMenuItem("查看大图", null, CoreWebView2ContextMenuItemKind.Command);
+                    showBigImage.CustomItemSelected += delegate
+                    {
+                        webViewControl.ExecuteScriptAsync("window.open('" + imageUrl + "')");
+                    };
+                    e.MenuItems.Add(showBigImage);
+                }
+            }
             CoreWebView2ContextMenuItem changeSkin = webView.Environment.CreateContextMenuItem("更换主题包", null, CoreWebView2ContextMenuItemKind.Command);
             changeSkin.CustomItemSelected += onChangeSkinClicked;
             e.MenuItems.Add(changeSkin);

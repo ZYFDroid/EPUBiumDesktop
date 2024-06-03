@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace EPUBium_Desktop
         [STAThread]
         static int Main(string[] args)
         {
-
+            PrepareWebview2RuntimeEnvironment();
             try
             {
                 string bookToOpen = null;
@@ -62,7 +63,7 @@ namespace EPUBium_Desktop
                     "app\\data\\appcache",
                     "app\\data\\appcache\\cover",
                     "app\\data\\cefdata");
-                HtDocs = new MyPakFile("htdocs.pak");
+                HtDocs = new MyPakFile(new MemoryStream(Properties.Resources.htdocs));
                 loadResPack();
                 DBUtils = new DBUtils();
                 ApiModel = new ApiModel();
@@ -92,6 +93,51 @@ namespace EPUBium_Desktop
 
         static void ensureDirectoryExists(params string[] paths) => paths.ToList().ForEach(p => { if (!Directory.Exists(p)) { Directory.CreateDirectory(p); } });
 
+        private static void PrepareWebview2RuntimeEnvironment()
+        {
+            string baseDir = Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "Epubium", "wvruntime_0");
+            if (!Directory.Exists(baseDir)) { Directory.CreateDirectory(baseDir); }
+            string flagFile = Path.Combine(baseDir, "runtime.ok");
+            if (!File.Exists(flagFile))
+            {
+                using (ZipArchive zipArchive = new ZipArchive(new MemoryStream(Properties.Resources.runtimes), ZipArchiveMode.Read, false))
+                {
+                    foreach (var item in zipArchive.Entries)
+                    {
+                        if (item.FullName.EndsWith("/"))
+                        {
+
+                        }
+                        else
+                        {
+                            string fileName = Path.Combine(baseDir, item.FullName);
+                            string fileDir = Path.GetDirectoryName(fileName);
+                            if (!Directory.Exists(fileDir)) { Directory.CreateDirectory(fileDir); }
+                            using (FileStream fs = File.Create(fileName))
+                            {
+                                using (Stream s = item.Open())
+                                {
+                                    s.CopyTo(fs);
+                                }
+                            }
+                        }
+                    }
+                    File.Create(flagFile).Close();
+                }
+
+            }
+
+            if (Environment.Is64BitProcess)
+            {
+                CoreWebView2Environment.SetLoaderDllFolderPath(Path.Combine(baseDir, "runtimes", "win-x64", "native"));
+            }
+            else
+            {
+
+                CoreWebView2Environment.SetLoaderDllFolderPath(Path.Combine(baseDir, "runtimes", "win-x86", "native"));
+            }
+
+        }
 
         private static void loadResPack()
         {
@@ -172,6 +218,23 @@ namespace EPUBium_Desktop
                 }
             }
         }
+
+        public MyPakFile(Stream stream)
+        {
+            ICSharpCode.SharpZipLib.Zip.ZipStrings.UseUnicode = true;
+            src = new ZipFile(stream);
+            System.Collections.IEnumerator en = src.GetEnumerator();
+            while (en.MoveNext())
+            {
+                ZipEntry ze = en.Current as ZipEntry;
+                if (ze != null)
+                {
+                    files.Add(ze.Name);
+                    Console.WriteLine(ze.Name);
+                }
+            }
+        }
+
 
         public virtual Stream OpenRead(string filename)
         {

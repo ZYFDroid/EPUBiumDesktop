@@ -71,12 +71,32 @@ namespace EPUBium_Desktop.Properties {
         }
         
         /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] htdocs {
+            get {
+                object obj = ResourceManager.GetObject("htdocs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
         /// </summary>
         internal static System.Drawing.Icon icon {
             get {
                 object obj = ResourceManager.GetObject("icon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] runtimes {
+            get {
+                object obj = ResourceManager.GetObject("runtimes", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }
