@@ -39,7 +39,7 @@ namespace EPUBium_Desktop
                     try
                     {
                         bookToOpen = Path.GetFullPath(args[0]);
-                    }catch(Exception ex) { }
+                    }catch { }
                 }
                 Environment.CurrentDirectory = Path.GetDirectoryName(Application.ExecutablePath);
                 if(bookToOpen != null)
@@ -151,7 +151,7 @@ namespace EPUBium_Desktop
                         respack = null;
                     }
                 }
-                catch (Exception ex) { }
+                catch { }
             }
 
             if(respack == null)
